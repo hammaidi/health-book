@@ -16,8 +16,6 @@ public class PatientService {
         this.patientRepository = patientRepository;
     }
 
-    //Service est en directe relation avec la dao
-    
     // ========================
     // CRÉER UN PATIENT
     // ========================
@@ -98,5 +96,21 @@ public class PatientService {
     // ========================
     public Optional<Patient> getPatientByEmail(String email) {
         return patientRepository.findByEmail(email);
+    }
+
+    // ========================
+    // MÉTHODES SIMPLIFIÉES POUR LE CONTROLLER
+    // ========================
+    
+    public List<Patient> findAll() {
+        return patientRepository.findAll();
+    }
+
+    public Patient savePatient(Patient patient) {
+        return patientRepository.save(patient);
+    }
+
+    public void deletePatientById(Long id) {
+        patientRepository.deleteById(id);
     }
 }

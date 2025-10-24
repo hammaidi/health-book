@@ -40,6 +40,50 @@ public class RendezVous {
         EN_ATTENTE, CONFIRME, ANNULE, TERMINE
     }
 
-    // === CONSTRUCTEURS & GETTERS/SETTERS ===
-    // (à compléter)
+    // === CONSTRUCTEURS ===
+    public RendezVous() {}
+
+    public RendezVous(Patient patient, Medecin medecin, LocalDateTime dateHeure, String motif) {
+        this.patient = patient;
+        this.medecin = medecin;
+        this.dateHeure = dateHeure;
+        this.motif = motif;
+    }
+
+    // === GETTERS & SETTERS ===
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public Patient getPatient() { return patient; }
+    public void setPatient(Patient patient) { this.patient = patient; }
+
+    public Medecin getMedecin() { return medecin; }
+    public void setMedecin(Medecin medecin) { this.medecin = medecin; }
+
+    public LocalDateTime getDateHeure() { return dateHeure; }
+    public void setDateHeure(LocalDateTime dateHeure) { this.dateHeure = dateHeure; }
+
+    public Integer getDuree() { return duree; }
+    public void setDuree(Integer duree) { this.duree = duree; }
+
+    public StatutRDV getStatut() { return statut; }
+    public void setStatut(StatutRDV statut) { this.statut = statut; }
+
+    public String getMotif() { return motif; }
+    public void setMotif(String motif) { this.motif = motif; }
+
+    public LocalDateTime getDateCreation() { return dateCreation; }
+    public void setDateCreation(LocalDateTime dateCreation) { this.dateCreation = dateCreation; }
+
+    // === toString() ===
+    @Override
+    public String toString() {
+        return "RendezVous{" +
+                "id=" + id +
+                ", patient=" + patient.getNom() + " " + patient.getPrenom() +
+                ", medecin=" + medecin.getNom() + " " + medecin.getPrenom() +
+                ", dateHeure=" + dateHeure +
+                ", statut=" + statut +
+                '}';
+    }
 }

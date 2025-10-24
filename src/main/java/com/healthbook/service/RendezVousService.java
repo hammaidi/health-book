@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class RendezVousService {
@@ -62,7 +63,7 @@ public class RendezVousService {
     // ========================
     public boolean isCreneauDisponible(Medecin medecin, LocalDateTime dateHeure) {
         long nbRendezVous = rendezVousRepository.countRendezVousByMedecinAndDateHeure(medecin, dateHeure);
-        return nbRendezVous == 0; // Aucun RDV à cette heure = créneau disponible
+        return nbRendezVous == 0;
     }
 
     // ========================
@@ -115,36 +116,23 @@ public class RendezVousService {
     }
 
     // ========================
-    // CRÉNEAUX DISPONIBLES POUR UN MÉDECIN
+    // TOUS LES RDV
     // ========================
-    public List<LocalDateTime> getCreneauxDisponibles(Long medecinId, LocalDateTime date) {
-        Medecin medecin = medecinService.getMedecinById(medecinId)
-                .orElseThrow(() -> new RuntimeException("Médecin non trouvé"));
-
-        // Générer des créneaux pour la journée (ex: 9h-17h, toutes les 30 min)
-        List<LocalDateTime> creneaux = genererCreneauxJournee(date);
-
-        // Filtrer les créneaux disponibles
-        return creneaux.stream()
-                .filter(creneau -> isCreneauDisponible(medecin, creneau))
-                .toList();
+    public List<RendezVous> findAll() {
+        return rendezVousRepository.findAll();
     }
 
     // ========================
-    // GÉNÉRER LES CRÉNEAUX D'UNE JOURNÉE
+    // RDV PAR ID
     // ========================
-    private List<LocalDateTime> genererCreneauxJournee(LocalDateTime date) {
-        List<LocalDateTime> creneaux = new java.util.ArrayList<>();
-        
-        LocalDateTime debutJournee = date.withHour(9).withMinute(0).withSecond(0);
-        LocalDateTime finJournee = date.withHour(17).withMinute(0).withSecond(0);
-        
-        LocalDateTime creneau = debutJournee;
-        while (creneau.isBefore(finJournee)) {
-            creneaux.add(creneau);
-            creneau = creneau.plusMinutes(30); // Créneaux de 30 minutes
-        }
-        
-        return creneaux;
+    public Optional<RendezVous> findById(Long id) {
+        return rendezVousRepository.findById(id);
+    }
+
+    // ========================
+    // SUPPRIMER RDV
+    // ========================
+    public void deleteRendezVous(Long id) {
+        rendezVousRepository.deleteById(id);
     }
 }

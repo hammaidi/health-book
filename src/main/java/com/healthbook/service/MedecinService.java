@@ -4,8 +4,6 @@ import com.healthbook.entity.Medecin;
 import com.healthbook.repository.MedecinRepository;
 import org.springframework.stereotype.Service;
 
-//Alt + shift + s  pour les imports necessaire
-
 import java.util.List;
 import java.util.Optional;
 
@@ -22,11 +20,9 @@ public class MedecinService {
     // CRÉER UN MÉDECIN
     // ========================
     public Medecin createMedecin(Medecin medecin) {
-        // Vérifier si l'email existe déjà
         if (medecinRepository.findByEmail(medecin.getEmail()).isPresent()) {
             throw new RuntimeException("Un médecin avec cet email existe déjà");
         }
-        
         return medecinRepository.save(medecin);
     }
 
@@ -76,7 +72,6 @@ public class MedecinService {
         Medecin medecin = medecinRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Médecin non trouvé avec l'id: " + id));
 
-        // Vérifier l'email
         if (medecinDetails.getEmail() != null && !medecinDetails.getEmail().equals(medecin.getEmail())) {
             Optional<Medecin> existingMedecin = medecinRepository.findByEmail(medecinDetails.getEmail());
             if (existingMedecin.isPresent() && !existingMedecin.get().getId().equals(id)) {
@@ -84,13 +79,11 @@ public class MedecinService {
             }
         }
 
-        // Mise à jour
         medecin.setNom(medecinDetails.getNom());
         medecin.setPrenom(medecinDetails.getPrenom());
         medecin.setSpecialite(medecinDetails.getSpecialite());
         medecin.setEmail(medecinDetails.getEmail());
         medecin.setTelephone(medecinDetails.getTelephone());
-        medecin.setTarifConsultation(medecinDetails.getTarifConsultation());
 
         return medecinRepository.save(medecin);
     }
@@ -101,7 +94,10 @@ public class MedecinService {
     public void deleteMedecin(Long id) {
         Medecin medecin = medecinRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Médecin non trouvé avec l'id: " + id));
-        
         medecinRepository.delete(medecin);
+    }
+
+    public List<Medecin> findAll() {
+        return medecinRepository.findAll();
     }
 }
