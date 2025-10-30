@@ -7,6 +7,7 @@ import com.healthbook.repository.RendezVousRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -106,6 +107,23 @@ public class RendezVousService {
                 .orElseThrow(() -> new RuntimeException("Médecin non trouvé"));
         
         return rendezVousRepository.findByMedecin(medecin);
+    }
+
+    // ========================
+    // RDV PAR UTILISATEUR (NOUVELLE MÉTHODE)
+    // ========================
+    public List<RendezVous> getRendezVousByUser(com.healthbook.entity.User user) {
+        if (user.getRole() == com.healthbook.entity.Role.PATIENT && user.getPatient() != null) {
+            // Patient : voir seulement ses RDV
+            return rendezVousRepository.findByPatient(user.getPatient());
+        } else if (user.getRole() == com.healthbook.entity.Role.MEDECIN && user.getMedecin() != null) {
+            // Médecin : voir ses consultations
+            return rendezVousRepository.findByMedecin(user.getMedecin());
+        } else if (user.getRole() == com.healthbook.entity.Role.ADMIN) {
+            // Admin : voir tous les RDV
+            return rendezVousRepository.findAll();
+        }
+        return Collections.emptyList();
     }
 
     // ========================

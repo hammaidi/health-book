@@ -27,15 +27,19 @@ public class SecurityConfig {
                 .requestMatchers("/patients/**").hasAnyRole("PATIENT", "ADMIN")
                 .requestMatchers("/medecins/**").hasAnyRole("MEDECIN", "ADMIN") 
                 .requestMatchers("/rendezvous/**").authenticated()
+                .requestMatchers("/dashboard/**").authenticated()  // ✅ AJOUTÉ
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
                 .loginPage("/login")
-                .defaultSuccessUrl("/")
+                .defaultSuccessUrl("/dashboard", true)  // ✅ CORRIGÉ : vers dashboard
                 .permitAll()
             )
             .logout(logout -> logout
-                .logoutSuccessUrl("/login?logout")
+                .logoutUrl("/logout")
+                .logoutSuccessUrl("/?logout")
+                .invalidateHttpSession(true)
+                .deleteCookies("JSESSIONID")
                 .permitAll()
             );
 

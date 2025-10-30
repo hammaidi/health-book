@@ -46,7 +46,7 @@ public class MedecinController {
     public String searchMedecins(@RequestParam(required = false) String specialite,
                                @RequestParam(required = false) String nom,
                                Model model) {
-        // ✅ Recherche avec filtres optionnels
+        //  Recherche avec filtres optionnels
         List<Medecin> medecins = medecinService.searchMedecins(specialite, nom);
         
         model.addAttribute("medecins", medecins);
