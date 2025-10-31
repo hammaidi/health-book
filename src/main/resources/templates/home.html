@@ -3,17 +3,18 @@
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <title>HealthBook - Accueil</title>
+    <title>HealthBook - Votre santé, notre priorité</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         .welcome-animation {
             animation: welcomeSlide 1.5s ease-out;
             background: linear-gradient(135deg, #198754, #20c997);
             color: white;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 30px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            padding: 40px 20px;
+            border-radius: 15px;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
         }
         
         @keyframes welcomeSlide {
@@ -29,11 +30,13 @@
         
         .card {
             transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: none;
+            border-radius: 15px;
         }
         
         .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
         }
         
         .btn-pulse {
@@ -46,36 +49,158 @@
             100% { transform: scale(1); }
         }
         
-        .logout-btn {
-            background: none;
-            border: none;
-            color: inherit;
-            cursor: pointer;
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
         }
-        .logout-btn:hover {
-            color: #198754 !important;
+        
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 80px 0;
+            border-radius: 0 0 50px 50px;
+            margin-bottom: 50px;
+        }
+        
+        .stats-section {
+            background: #f8f9fa;
+            padding: 50px 0;
+            border-radius: 50px 50px 0 0;
+            margin-top: 50px;
         }
     </style>
 </head>
 <body>
-    <div class="container mt-5">
+    <!-- HERO SECTION -->
+    <div class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h1 class="display-4 fw-bold">🏥 HealthBook</h1>
+                    <p class="lead fs-4">Votre plateforme de gestion médicale complète</p>
+                    <p class="mb-4">Prenez rendez-vous en ligne, gérez vos consultations et simplifiez votre suivi médical</p>
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                        <a sec:authorize="isAnonymous()" th:href="@{/register}" class="btn btn-success btn-lg px-4 me-md-2 btn-pulse">
+                            📝 Commencer maintenant
+                        </a>
+                        <a sec:authorize="isAnonymous()" th:href="@{/login}" class="btn btn-outline-light btn-lg px-4">
+                            🔐 Se connecter
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-6 text-center">
+                    <div class="feature-icon">💊</div>
+                    <div class="feature-icon">🩺</div>
+                    <div class="feature-icon">📱</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
         <!-- Bannière BIENVENUE - seulement si connecté -->
         <div sec:authorize="isAuthenticated()" class="welcome-animation text-center">
             <h2>👋 Bienvenue, <span sec:authentication="name"></span> !</h2>
-            <p class="mb-0">Heureux de vous revoir sur HealthBook</p>
+            <p class="mb-0" th:if="${currentUser}">
+                Rôle : 
+                <span th:if="${currentUser.role.name() == 'ADMIN'}" class="badge bg-danger role-badge">👑 ADMINISTRATEUR</span>
+                <span th:if="${currentUser.role.name() == 'MEDECIN'}" class="badge bg-primary role-badge">👨‍⚕️ MÉDECIN</span>
+                <span th:if="${currentUser.role.name() == 'PATIENT'}" class="badge bg-success role-badge">👤 PATIENT</span>
+            </p>
         </div>
 
-        <div class="jumbotron">
-            <h1 class="display-4">🏥 HealthBook</h1>
-            <p class="lead">Système de gestion médicale</p>
+        <!-- SECTION POUR VISITEURS NON CONNECTÉS -->
+        <div sec:authorize="isAnonymous()">
+            <!-- Présentation des fonctionnalités -->
+            <div class="row mb-5">
+                <div class="col-12 text-center mb-4">
+                    <h2 class="display-5">🌟 Pourquoi choisir HealthBook ?</h2>
+                    <p class="lead">Une solution complète pour gérer votre santé en toute simplicité</p>
+                </div>
+                
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 text-center">
+                        <div class="card-body">
+                            <div class="feature-icon">📅</div>
+                            <h5 class="card-title">Prise de RDV en ligne</h5>
+                            <p class="card-text">Réservez vos consultations en quelques clics, 24h/24 et 7j/7</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 text-center">
+                        <div class="card-body">
+                            <div class="feature-icon">👨‍⚕️</div>
+                            <h5 class="card-title">Médecins qualifiés</h5>
+                            <p class="card-text">Accédez à notre réseau de professionnels de santé certifiés</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 text-center">
+                        <div class="card-body">
+                            <div class="feature-icon">🔒</div>
+                            <h5 class="card-title">Sécurité des données</h5>
+                            <p class="card-text">Vos informations médicales sont protégées et confidentielles</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comment ça marche -->
+            <div class="row mb-5">
+                <div class="col-12 text-center mb-4">
+                    <h3>🚀 Comment ça marche ?</h3>
+                </div>
+                <div class="col-md-3 text-center">
+                    <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <h4 class="mb-0">1</h4>
+                    </div>
+                    <h5 class="mt-3">Inscription</h5>
+                    <p>Créez votre compte en 2 minutes</p>
+                </div>
+                <div class="col-md-3 text-center">
+                    <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <h4 class="mb-0">2</h4>
+                    </div>
+                    <h5 class="mt-3">Choisir</h5>
+                    <p>Sélectionnez un médecin et un créneau</p>
+                </div>
+                <div class="col-md-3 text-center">
+                    <div class="bg-info text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <h4 class="mb-0">3</h4>
+                    </div>
+                    <h5 class="mt-3">Confirmer</h5>
+                    <p>Validez votre rendez-vous</p>
+                </div>
+                <div class="col-md-3 text-center">
+                    <div class="bg-warning text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <h4 class="mb-0">4</h4>
+                    </div>
+                    <h5 class="mt-3">Consulter</h5>
+                    <p>Retrouvez tous vos RDV en un lieu</p>
+                </div>
+            </div>
         </div>
-        
-        <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+
+        <!-- NAVIGATION -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4 rounded">
             <div class="navbar-nav">
                 <a class="nav-link" th:href="@{/}">Accueil</a>
-                <a class="nav-link" th:href="@{/patients}">Patients</a>
-                <a class="nav-link" th:href="@{/medecins}">Médecins</a>
-                <a class="nav-link" th:href="@{/rendezvous}">Rendez-vous</a>
+                
+                <!-- 🔒 PATIENTS - SEULEMENT POUR ADMIN -->
+                <a class="nav-link" sec:authorize="hasRole('ADMIN')" th:href="@{/patients}">Patients</a>
+                
+                <!-- MÉDECINS - POUR TOUS LES UTILISATEURS CONNECTÉS -->
+                <a class="nav-link" sec:authorize="isAuthenticated()" th:href="@{/medecins}">Médecins</a>
+                
+                <!-- RENDEZ-VOUS - POUR TOUS LES UTILISATEURS CONNECTÉS -->
+                <a class="nav-link" sec:authorize="isAuthenticated()" th:href="@{/rendezvous}">Rendez-vous</a>
+                
+                <!-- DASHBOARD - POUR TOUS LES UTILISATEURS CONNECTÉS -->
+                <a class="nav-link" sec:authorize="isAuthenticated()" th:href="@{/dashboard}">Mon Dashboard</a>
                 
                 <!-- CONNEXION/INSCRIPTION - seulement si NON connecté -->
                 <a class="nav-link" sec:authorize="isAnonymous()" th:href="@{/login}">🔐 Connexion</a>
@@ -94,35 +219,96 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
 
-        <div class="row">
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">👥 Patients</h5>
-                        <p class="card-text">Gérer la liste des patients</p>
-                        <a th:href="@{/patients}" class="btn btn-primary btn-pulse">Voir les patients</a>
+        <!-- STATISTIQUES GLOBALES (visibles par tous) -->
+        <div class="stats-section">
+            <div class="container">
+                <div class="row text-center">
+                    <div class="col-12 mb-4">
+                        <h3>📊 HealthBook en chiffres</h3>
+                        <p class="lead">Rejoignez notre communauté de confiance</p>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card bg-primary text-white">
+                            <div class="card-body">
+                                <h2 class="display-4" th:text="${totalPatients}">0</h2>
+                                <p class="mb-0">👥 Patients satisfaits</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card bg-success text-white">
+                            <div class="card-body">
+                                <h2 class="display-4" th:text="${totalMedecins}">0</h2>
+                                <p class="mb-0">👨‍⚕️ Médecins partenaires</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card bg-info text-white">
+                            <div class="card-body">
+                                <h2 class="display-4" th:text="${#lists.size(prochainsRDV)}">0</h2>
+                                <p class="mb-0">📅 RDV programmés</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
+        </div>
+
+        <!-- CARTES D'ACTION SELON LE RÔLE (seulement connectés) -->
+        <div sec:authorize="isAuthenticated()" class="row mt-5">
+            <!-- CARTE PATIENTS - SEULEMENT POUR ADMIN -->
+            <div class="col-md-4" sec:authorize="hasRole('ADMIN')">
                 <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">👨‍⚕️ Médecins</h5>
-                        <p class="card-text">Gérer les médecins</p>
+                    <div class="card-body text-center">
+                        <h5 class="card-title">👥 Gestion des Patients</h5>
+                        <p class="card-text">Accès complet à la liste des patients</p>
+                        <a th:href="@{/patients}" class="btn btn-primary btn-pulse">Voir tous les patients</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- CARTE MÉDECINS - POUR TOUS -->
+            <div class="col-md-4" sec:authorize="isAuthenticated()">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">👨‍⚕️ Liste des Médecins</h5>
+                        <p class="card-text">Consulter nos médecins partenaires</p>
                         <a th:href="@{/medecins}" class="btn btn-primary btn-pulse">Voir les médecins</a>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
+            
+            <!-- CARTE RENDEZ-VOUS - POUR TOUS -->
+            <div class="col-md-4" sec:authorize="isAuthenticated()">
                 <div class="card">
-                    <div class="card-body">
+                    <div class="card-body text-center">
                         <h5 class="card-title">📅 Rendez-vous</h5>
-                        <p class="card-text">Gérer les rendez-vous</p>
-                        <a th:href="@{/rendezvous}" class="btn btn-primary btn-pulse">Voir les RDV</a>
-                        <a th:href="@{/rendezvous/new}" class="btn btn-success mt-2">Nouveau RDV</a>
+                        <p class="card-text">Gérer vos rendez-vous médicaux</p>
+                        <a th:href="@{/rendezvous}" class="btn btn-primary btn-pulse">Voir mes RDV</a>
+                        <a th:href="@{/rendezvous/new}" class="btn btn-success mt-2">Prendre un RDV</a>
                     </div>
                 </div>
             </div>
+        </div>
+
+        <!-- MESSAGES INFORMATIFS -->
+        <div sec:authorize="hasRole('PATIENT')" class="alert alert-info mt-4">
+            <h6>💡 Information</h6>
+            <p class="mb-0">En tant que patient, vous avez accès à la liste des médecins pour prendre rendez-vous, mais pas à la liste des autres patients pour respecter la confidentialité.</p>
+        </div>
+
+        <div sec:authorize="hasRole('MEDECIN')" class="alert alert-info mt-4">
+            <h6>💡 Information</h6>
+            <p class="mb-0">En tant que médecin, vous avez accès à la liste de vos collègues, mais pas à la liste des patients pour respecter la confidentialité médicale.</p>
+        </div>
+
+        <!-- CALL TO ACTION POUR VISITEURS -->
+        <div sec:authorize="isAnonymous()" class="text-center mt-5 p-5 bg-light rounded">
+            <h3>🎯 Prêt à commencer ?</h3>
+            <p class="lead mb-4">Rejoignez HealthBook dès maintenant et simplifiez votre gestion médicale</p>
+            <a th:href="@{/register}" class="btn btn-success btn-lg px-5 btn-pulse">Créer mon compte gratuitement</a>
+            <p class="mt-3 text-muted">Déjà inscrit ? <a th:href="@{/login}">Connectez-vous ici</a></p>
         </div>
     </div>
 

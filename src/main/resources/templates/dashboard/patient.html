@@ -5,34 +5,90 @@
     <meta charset="UTF-8">
     <title>Mon Tableau de Bord - Patient</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .card {
+            transition: transform 0.2s ease;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #198754, #20c997);
+            color: white;
+        }
+        .rdv-annule {
+            opacity: 0.6;
+            background-color: #f8f9fa;
+        }
+    </style>
 </head>
 <body>
-    <div class="container mt-5">
-        <!-- En-tête -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1>👤 Mon Tableau de Bord</h1>
-            <a th:href="@{/}" class="btn btn-outline-secondary">← Retour à l'accueil</a>
+    <div class="container mt-4">
+        <!-- Navigation -->
+        <nav class="navbar navbar-light bg-light mb-4">
+            <div class="navbar-nav">
+                <a class="nav-link" th:href="@{/}">🏠 Accueil</a>
+                <a class="nav-link" th:href="@{/rendezvous/new}">📅 Prendre RDV</a>
+                <a class="nav-link" th:href="@{/dashboard/edit}">✏️ Modifier profil</a>
+                <form th:action="@{/logout}" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-link nav-link p-0 border-0">🚪 Déconnexion</button>
+                </form>
+            </div>
+        </nav>
+
+        <!-- Messages -->
+        <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show">
+            ✅ <span th:text="${param.success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show">
+            ❌ <span th:text="${param.error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
 
-        <!-- Informations patient -->
+        <!-- En-tête -->
         <div class="row mb-4">
-            <div class="col-md-6">
-                <div class="card">
+            <div class="col-12">
+                <div class="stat-card card text-center py-3">
                     <div class="card-body">
-                        <h5 class="card-title">📋 Mes Informations</h5>
-                        <p><strong>Nom :</strong> <span th:text="${user.patient.nom}">-</span></p>
-                        <p><strong>Prénom :</strong> <span th:text="${user.patient.prenom}">-</span></p>
-                        <p><strong>Email :</strong> <span th:text="${user.username}">-</span></p>
-                        <p><strong>Téléphone :</strong> <span th:text="${user.patient.telephone}">Non renseigné</span></p>
+                        <h1 class="display-6">👤 Mon Tableau de Bord</h1>
+                        <p class="lead mb-0">Bienvenue, <span th:text="${user.patient.nom + ' ' + user.patient.prenom}"></span></p>
                     </div>
                 </div>
             </div>
-            <div class="col-md-6">
-                <div class="card">
+        </div>
+
+        <!-- Informations et statistiques -->
+        <div class="row mb-4">
+            <div class="col-md-6 mb-3">
+                <div class="card h-100">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0">📋 Mes Informations</h5>
+                    </div>
                     <div class="card-body">
-                        <h5 class="card-title">📊 Statistiques</h5>
-                        <p><strong>RDV à venir :</strong> <span th:text="${#lists.size(rendezvous)}">0</span></p>
-                        <a th:href="@{/rendezvous/new}" class="btn btn-success">📅 Prendre un RDV</a>
+                        <p><strong>Nom :</strong> <span th:text="${user.patient.nom}">-</span></p>
+                        <p><strong>Prénom :</strong> <span th:text="${user.patient.prenom}">-</span></p>
+                        <p><strong>Email :</strong> <span th:text="${user.username}">-</span></p>
+                        <p><strong>Téléphone :</strong> 
+                            <span th:if="${user.patient.telephone}" th:text="${user.patient.telephone}"></span>
+                            <span th:unless="${user.patient.telephone}" class="text-muted">Non renseigné</span>
+                        </p>
+                        <div class="mt-3">
+                            <a th:href="@{/dashboard/edit}" class="btn btn-outline-primary btn-sm">✏️ Modifier mon profil</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div class="card h-100">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="card-title mb-0">📊 Mes Statistiques</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <!-- 🔥 COMPTE SEULEMENT LES RDV NON ANNULÉS -->
+                        <h2 class="display-4 text-success" th:text="${#lists.size(rendezvous.?[statut.name() != 'ANNULE'])}">0</h2>
+                        <p class="lead">Rendez-vous à venir</p>
+                        <a th:href="@{/rendezvous/new}" class="btn btn-success btn-lg">📅 Prendre un RDV</a>
                     </div>
                 </div>
             </div>
@@ -40,34 +96,91 @@
 
         <!-- Mes rendez-vous -->
         <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">📅 Mes Rendez-vous</h5>
+            <div class="card-header bg-info text-white">
+                <h5 class="card-title mb-0">📅 Mes Rendez-vous Actifs</h5>
             </div>
             <div class="card-body">
-                <div th:if="${#lists.isEmpty(rendezvous)}" class="alert alert-info">
-                    Vous n'avez aucun rendez-vous programmé.
-                    <a th:href="@{/rendezvous/new}">Prendre un rendez-vous</a>
+                <!-- 🔥 FILTRER POUR NE MONTRER QUE LES RDV NON ANNULÉS -->
+                <div th:if="${#lists.isEmpty(rendezvous.?[statut.name() != 'ANNULE'])}" class="alert alert-info text-center">
+                    <h5>📭 Aucun rendez-vous programmé</h5>
+                    <p>Vous n'avez pas encore de rendez-vous de planifié.</p>
+                    <a th:href="@{/rendezvous/new}" class="btn btn-primary">Prendre mon premier rendez-vous</a>
                 </div>
 
-                <div th:unless="${#lists.isEmpty(rendezvous)}" class="table-responsive">
-                    <table class="table table-striped">
-                        <thead>
+                <div th:unless="${#lists.isEmpty(rendezvous.?[statut.name() != 'ANNULE'])}" class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
                             <tr>
-                                <th>Médecin</th>
-                                <th>Date et Heure</th>
-                                <th>Motif</th>
-                                <th>Statut</th>
+                                <th>👨‍⚕️ Médecin</th>
+                                <th>📅 Date et Heure</th>
+                                <th>📝 Motif</th>
+                                <th>🏷️ Statut</th>
+                                <th>⚡ Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr th:each="rdv : ${rendezvous}">
-                                <td th:text="${rdv.medecin.nom + ' ' + rdv.medecin.prenom}"></td>
-                                <td th:text="${#temporals.format(rdv.dateHeure, 'dd/MM/yyyy HH:mm')}"></td>
-                                <td th:text="${rdv.motif}"></td>
+                            <!-- 🔥 AFFICHER SEULEMENT LES RDV NON ANNULÉS -->
+                            <tr th:each="rdv : ${rendezvous}" 
+                                th:if="${rdv.statut.name() != 'ANNULE'}">
                                 <td>
-                                    <span th:if="${rdv.statut == 'CONFIRME'}" class="badge bg-success" th:text="${rdv.statut}"></span>
-                                    <span th:if="${rdv.statut == 'ANNULE'}" class="badge bg-danger" th:text="${rdv.statut}"></span>
-                                    <span th:if="${rdv.statut == 'EN_ATTENTE'}" class="badge bg-warning" th:text="${rdv.statut}"></span>
+                                    <strong th:text="${rdv.medecin.nom + ' ' + rdv.medecin.prenom}"></strong>
+                                    <br>
+                                    <small class="text-muted" th:text="${rdv.medecin.specialite}"></small>
+                                </td>
+                                <td th:text="${#temporals.format(rdv.dateHeure, 'dd/MM/yyyy à HH:mm')}"></td>
+                                <td>
+                                    <span th:if="${rdv.motif}" th:text="${rdv.motif}"></span>
+                                    <span th:unless="${rdv.motif}" class="text-muted">Non spécifié</span>
+                                </td>
+                                <td>
+                                    <span th:if="${rdv.statut == 'CONFIRME'}" class="badge bg-success" th:text="${rdv.statut}">CONFIRME</span>
+                                    <span th:if="${rdv.statut == 'ANNULE'}" class="badge bg-danger" th:text="${rdv.statut}">ANNULE</span>
+                                    <span th:if="${rdv.statut == 'EN_ATTENTE'}" class="badge bg-warning" th:text="${rdv.statut}">EN_ATTENTE</span>
+                                </td>
+                                <td>
+                                    <!-- Bouton Annuler pour le patient -->
+                                    <form th:action="@{/rendezvous/{id}/cancel(id=${rdv.id})}" method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-outline-danger btn-sm"
+                                                th:disabled="${rdv.statut == 'ANNULE' || rdv.statut == 'CONFIRME'}"
+                                                title="Annuler ce rendez-vous"
+                                                onclick="return confirm('Êtes-vous sûr de vouloir annuler ce rendez-vous ?')">
+                                            ❌ Annuler
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section RDV annulés (optionnel) -->
+        <div th:if="${not #lists.isEmpty(rendezvous.?[statut.name() == 'ANNULE'])}" class="card mt-4">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="card-title mb-0">📋 Historique des RDV annulés</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Médecin</th>
+                                <th>Date prévue</th>
+                                <th>Motif</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="rdv : ${rendezvous}" th:if="${rdv.statut.name() == 'ANNULE'}">
+                                <td>
+                                    <span th:text="${rdv.medecin.nom + ' ' + rdv.medecin.prenom}"></span>
+                                    <br>
+                                    <small class="text-muted" th:text="${rdv.medecin.specialite}"></small>
+                                </td>
+                                <td th:text="${#temporals.format(rdv.dateHeure, 'dd/MM/yyyy HH:mm')}"></td>
+                                <td>
+                                    <span th:if="${rdv.motif}" th:text="${rdv.motif}"></span>
+                                    <span th:unless="${rdv.motif}" class="text-muted">Non spécifié</span>
                                 </td>
                             </tr>
                         </tbody>
@@ -76,5 +189,18 @@
             </div>
         </div>
     </div>
+
+    <!-- 🔥 SCRIPT POUR FORCER LE RAFRAÎCHISSEMENT -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Rafraîchir la page après une annulation réussie
+            const successMessage = document.querySelector('.alert-success');
+            if (successMessage && successMessage.textContent.includes('annulé')) {
+                setTimeout(() => {
+                    window.location.href = '/dashboard';
+                }, 1500);
+            }
+        });
+    </script>
 </body>
 </html>

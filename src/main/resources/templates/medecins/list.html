@@ -14,34 +14,88 @@
                 <a class="nav-link" th:href="@{/}">Accueil</a>
                 <a class="nav-link" th:href="@{/rendezvous}">Rendez-vous</a>
                 <a class="nav-link" th:href="@{/rendezvous/new}">Nouveau RDV</a>
+                <a class="nav-link" th:href="@{/dashboard}">Dashboard</a>
             </div>
         </nav>
 
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Nom</th>
-                    <th>Prénom</th>
-                    <th>Spécialité</th>
-                    <th>Email</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="medecin : ${medecins}">
-                    <td th:text="${medecin.id}"></td>
-                    <td th:text="${medecin.nom}"></td>
-                    <td th:text="${medecin.prenom}"></td>
-                    <td th:text="${medecin.specialite}"></td>
-                    <td th:text="${medecin.email}"></td>
-                    <td>
-                        <a th:href="@{/medecins/edit/{id}(id=${medecin.id})}" class="btn btn-warning btn-sm">Modifier</a>
-                        <a th:href="@{/medecins/delete/{id}(id=${medecin.id})}" class="btn btn-danger btn-sm">Supprimer</a>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+        <!-- Messages -->
+        <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show">
+            ✅ <span th:text="${param.success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show">
+            ❌ <span th:text="${param.error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Recherche -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">🔍 Rechercher des médecins</h5>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/medecins/search}" method="get" class="row g-3">
+                    <div class="col-md-4">
+                        <label for="specialite" class="form-label">Spécialité</label>
+                        <select class="form-control" id="specialite" name="specialite">
+                            <option value="">Toutes les spécialités</option>
+                            <option th:each="spec : ${specialites}" 
+                                    th:value="${spec}"
+                                    th:text="${spec}"
+                                    th:selected="${selectedSpecialite == spec}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="nom" class="form-label">Nom</label>
+                        <input type="text" class="form-control" id="nom" name="nom" 
+                               th:value="${searchNom}" placeholder="Rechercher par nom...">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">&nbsp;</label>
+                        <div>
+                            <button type="submit" class="btn btn-primary">🔍 Rechercher</button>
+                            <a th:href="@{/medecins}" class="btn btn-secondary">🔄 Réinitialiser</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Liste -->
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="card-title mb-0">Liste des Médecins</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Nom</th>
+                                <th>Prénom</th>
+                                <th>Spécialité</th>
+                                <th>Email</th>
+                                <th>Téléphone</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="medecin : ${medecins}">
+                                <td th:text="${medecin.nom}"></td>
+                                <td th:text="${medecin.prenom}"></td>
+                                <td>
+                                    <span class="badge bg-primary" th:text="${medecin.specialite}"></span>
+                                </td>
+                                <td th:text="${medecin.email}"></td>
+                                <td>
+                                    <span th:if="${medecin.telephone}" th:text="${medecin.telephone}"></span>
+                                    <span th:unless="${medecin.telephone}" class="text-muted">Non renseigné</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 </body>
 </html>

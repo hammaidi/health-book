@@ -3,8 +3,11 @@ package com.healthbook.service;
 import com.healthbook.entity.Medecin;
 import com.healthbook.entity.Patient;
 import com.healthbook.entity.RendezVous;
+import com.healthbook.entity.User;
+import com.healthbook.entity.Role;
 import com.healthbook.repository.RendezVousRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -12,6 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class RendezVousService {
 
     private final RendezVousRepository rendezVousRepository;
@@ -70,57 +74,48 @@ public class RendezVousService {
     // ========================
     // CONFIRMER UN RDV
     // ========================
+    @Transactional
     public RendezVous confirmerRendezVous(Long rdvId) {
         RendezVous rendezVous = rendezVousRepository.findById(rdvId)
                 .orElseThrow(() -> new RuntimeException("Rendez-vous non trouvé"));
 
         rendezVous.setStatut(RendezVous.StatutRDV.CONFIRME);
-        return rendezVousRepository.save(rendezVous);
+        RendezVous rdvSauvegarde = rendezVousRepository.save(rendezVous);
+        
+        // 🔥 FORCER le flush pour s'assurer que c'est sauvegardé
+        rendezVousRepository.flush();
+        
+        return rdvSauvegarde;
     }
 
     // ========================
     // ANNULER UN RDV
     // ========================
+    @Transactional
     public RendezVous annulerRendezVous(Long rdvId) {
         RendezVous rendezVous = rendezVousRepository.findById(rdvId)
                 .orElseThrow(() -> new RuntimeException("Rendez-vous non trouvé"));
 
         rendezVous.setStatut(RendezVous.StatutRDV.ANNULE);
-        return rendezVousRepository.save(rendezVous);
-    }
-
-    // ========================
-    // RÉCUPÉRER RDV D'UN PATIENT
-    // ========================
-    public List<RendezVous> getRendezVousByPatient(Long patientId) {
-        Patient patient = patientService.getPatientById(patientId)
-                .orElseThrow(() -> new RuntimeException("Patient non trouvé"));
+        RendezVous rdvSauvegarde = rendezVousRepository.save(rendezVous);
         
-        return rendezVousRepository.findByPatient(patient);
-    }
-
-    // ========================
-    // RÉCUPÉRER RDV D'UN MÉDECIN
-    // ========================
-    public List<RendezVous> getRendezVousByMedecin(Long medecinId) {
-        Medecin medecin = medecinService.getMedecinById(medecinId)
-                .orElseThrow(() -> new RuntimeException("Médecin non trouvé"));
+        // 🔥 FORCER le flush pour s'assurer que c'est sauvegardé
+        rendezVousRepository.flush();
         
-        return rendezVousRepository.findByMedecin(medecin);
+        return rdvSauvegarde;
     }
 
     // ========================
-    // RDV PAR UTILISATEUR (NOUVELLE MÉTHODE)
+    // RDV PAR UTILISATEUR (AMÉLIORÉE)
     // ========================
-    public List<RendezVous> getRendezVousByUser(com.healthbook.entity.User user) {
-        if (user.getRole() == com.healthbook.entity.Role.PATIENT && user.getPatient() != null) {
-            // Patient : voir seulement ses RDV
+    @Transactional(readOnly = true)
+    public List<RendezVous> getRendezVousByUser(User user) {
+        // 🔥 TOUJOURS recharger depuis la base de données
+        if (user.getRole() == Role.PATIENT && user.getPatient() != null) {
             return rendezVousRepository.findByPatient(user.getPatient());
-        } else if (user.getRole() == com.healthbook.entity.Role.MEDECIN && user.getMedecin() != null) {
-            // Médecin : voir ses consultations
+        } else if (user.getRole() == Role.MEDECIN && user.getMedecin() != null) {
             return rendezVousRepository.findByMedecin(user.getMedecin());
-        } else if (user.getRole() == com.healthbook.entity.Role.ADMIN) {
-            // Admin : voir tous les RDV
+        } else if (user.getRole() == Role.ADMIN) {
             return rendezVousRepository.findAll();
         }
         return Collections.emptyList();
@@ -152,5 +147,25 @@ public class RendezVousService {
     // ========================
     public void deleteRendezVous(Long id) {
         rendezVousRepository.deleteById(id);
+    }
+
+    // ========================
+    // RÉCUPÉRER RDV D'UN PATIENT
+    // ========================
+    public List<RendezVous> getRendezVousByPatient(Long patientId) {
+        Patient patient = patientService.getPatientById(patientId)
+                .orElseThrow(() -> new RuntimeException("Patient non trouvé"));
+        
+        return rendezVousRepository.findByPatient(patient);
+    }
+
+    // ========================
+    // RÉCUPÉRER RDV D'UN MÉDECIN
+    // ========================
+    public List<RendezVous> getRendezVousByMedecin(Long medecinId) {
+        Medecin medecin = medecinService.getMedecinById(medecinId)
+                .orElseThrow(() -> new RuntimeException("Médecin non trouvé"));
+        
+        return rendezVousRepository.findByMedecin(medecin);
     }
 }

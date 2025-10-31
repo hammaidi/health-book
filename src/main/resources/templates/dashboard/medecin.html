@@ -1,133 +1,155 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <title>Tableau de Bord - Médecin</title>
+    <title>HealthBook - Accueil</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        .card {
-            transition: transform 0.2s ease;
-        }
-        .card:hover {
-            transform: translateY(-2px);
-        }
-        .stat-card {
-            background: linear-gradient(135deg, #0d6efd, #0dcaf0);
+        .welcome-animation {
+            animation: welcomeSlide 1.5s ease-out;
+            background: linear-gradient(135deg, #198754, #20c997);
             color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        @keyframes welcomeSlide {
+            0% {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            100% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .btn-pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .logout-btn {
+            background: none;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+        }
+        .logout-btn:hover {
+            color: #198754 !important;
         }
     </style>
 </head>
 <body>
-    <div class="container mt-4">
-        <!-- Navigation -->
-        <nav class="navbar navbar-light bg-light mb-4">
+    <div class="container mt-5">
+        <!-- Bannière BIENVENUE - seulement si connecté -->
+        <div sec:authorize="isAuthenticated()" class="welcome-animation text-center">
+            <h2>👋 Bienvenue, <span sec:authentication="name"></span> !</h2>
+            <p class="mb-0">Heureux de vous revoir sur HealthBook</p>
+        </div>
+
+        <div class="jumbotron">
+            <h1 class="display-4">🏥 HealthBook</h1>
+            <p class="lead">Système de gestion médicale</p>
+        </div>
+        
+        <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
             <div class="navbar-nav">
-                <a class="nav-link" th:href="@{/}">🏠 Accueil</a>
-                <a class="nav-link" th:href="@{/medecins}">👨‍⚕️ Liste Médecins</a>
-                <form th:action="@{/logout}" method="post" class="d-inline">
-                    <button type="submit" class="btn btn-link nav-link p-0 border-0">🚪 Déconnexion</button>
+                <a class="nav-link" th:href="@{/}">Accueil</a>
+                <a class="nav-link" th:href="@{/patients}">Patients</a>
+                <a class="nav-link" th:href="@{/medecins}">Médecins</a>
+                <a class="nav-link" th:href="@{/rendezvous}">Rendez-vous</a>
+                
+                <!-- CONNEXION/INSCRIPTION - seulement si NON connecté -->
+                <a class="nav-link" sec:authorize="isAnonymous()" th:href="@{/login}">🔐 Connexion</a>
+                <a class="nav-link" sec:authorize="isAnonymous()" th:href="@{/register}">📝 Inscription</a>
+                
+                <!-- DÉCONNEXION - seulement si connecté -->
+                <form sec:authorize="isAuthenticated()" th:action="@{/logout}" method="post" class="d-inline">
+                    <button type="submit" class="logout-btn nav-link p-0 border-0">🚪 Déconnexion</button>
                 </form>
             </div>
         </nav>
 
-        <!-- En-tête -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="stat-card card text-center py-3">
-                    <div class="card-body">
-                        <h1 class="display-6">👨‍⚕️ Tableau de Bord Médecin</h1>
-                        <p class="lead mb-0">Dr. <span th:text="${user.medecin.nom + ' ' + user.medecin.prenom}"></span> - <span th:text="${user.medecin.specialite}"></span></p>
-                    </div>
-                </div>
-            </div>
+        <!-- Message de déconnexion -->
+        <div th:if="${param.logout}" class="alert alert-success alert-dismissible fade show">
+            ✅ Vous avez été déconnecté avec succès !
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
 
-        <!-- Informations et statistiques -->
-        <div class="row mb-4">
-            <div class="col-md-6 mb-3">
-                <div class="card h-100">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="card-title mb-0">📋 Mes Informations</h5>
-                    </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card">
                     <div class="card-body">
-                        <p><strong>Nom :</strong> <span th:text="${user.medecin.nom}">-</span></p>
-                        <p><strong>Prénom :</strong> <span th:text="${user.medecin.prenom}">-</span></p>
-                        <p><strong>Spécialité :</strong> <span th:text="${user.medecin.specialite}">-</span></p>
-                        <p><strong>Email :</strong> <span th:text="${user.username}">-</span></p>
-                        <p><strong>Téléphone :</strong> 
-                            <span th:if="${user.medecin.telephone}" th:text="${user.medecin.telephone}"></span>
-                            <span th:unless="${user.medecin.telephone}" class="text-muted">Non renseigné</span>
-                        </p>
+                        <h5 class="card-title">👥 Patients</h5>
+                        <p class="card-text">Gérer la liste des patients</p>
+                        <a th:href="@{/patients}" class="btn btn-primary btn-pulse">Voir les patients</a>
                     </div>
                 </div>
             </div>
-            <div class="col-md-6 mb-3">
-                <div class="card h-100">
-                    <div class="card-header bg-info text-white">
-                        <h5 class="card-title mb-0">📊 Mes Consultations</h5>
-                    </div>
-                    <div class="card-body text-center">
-                        <h2 class="display-4 text-info" th:text="${#lists.size(rendezvous)}">0</h2>
-                        <p class="lead">Rendez-vous à venir</p>
-                        <div class="btn-group">
-                            <button class="btn btn-outline-info">📅 Voir mon agenda</button>
-                        </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">👨‍⚕️ Médecins</h5>
+                        <p class="card-text">Gérer les médecins</p>
+                        <a th:href="@{/medecins}" class="btn btn-primary btn-pulse">Voir les médecins</a>
                     </div>
                 </div>
             </div>
-        </div>
-
-        <!-- Mes consultations -->
-        <div class="card">
-            <div class="card-header bg-warning text-dark">
-                <h5 class="card-title mb-0">📅 Mes Consultations à Venir</h5>
-            </div>
-            <div class="card-body">
-                <div th:if="${#lists.isEmpty(rendezvous)}" class="alert alert-info text-center">
-                    <h5>📭 Aucune consultation programmée</h5>
-                    <p>Vous n'avez pas de consultations de planifiées pour le moment.</p>
-                </div>
-
-                <div th:unless="${#lists.isEmpty(rendezvous)}" class="table-responsive">
-                    <table class="table table-hover">
-                        <thead class="table-light">
-                            <tr>
-                                <th>👤 Patient</th>
-                                <th>📅 Date et Heure</th>
-                                <th>📝 Motif</th>
-                                <th>🏷️ Statut</th>
-                                <th>⚡ Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:each="rdv : ${rendezvous}">
-                                <td>
-                                    <strong th:text="${rdv.patient.nom + ' ' + rdv.patient.prenom}"></strong>
-                                    <br>
-                                    <small class="text-muted" th:text="${rdv.patient.email}"></small>
-                                </td>
-                                <td th:text="${#temporals.format(rdv.dateHeure, 'dd/MM/yyyy à HH:mm')}"></td>
-                                <td>
-                                    <span th:if="${rdv.motif}" th:text="${rdv.motif}"></span>
-                                    <span th:unless="${rdv.motif}" class="text-muted">Non spécifié</span>
-                                </td>
-                                <td>
-                                    <span th:if="${rdv.statut == 'CONFIRME'}" class="badge bg-success" th:text="${rdv.statut}">CONFIRME</span>
-                                    <span th:if="${rdv.statut == 'ANNULE'}" class="badge bg-danger" th:text="${rdv.statut}">ANNULE</span>
-                                    <span th:if="${rdv.statut == 'EN_ATTENTE'}" class="badge bg-warning" th:text="${rdv.statut}">EN_ATTENTE</span>
-                                </td>
-                                <td>
-                                    <div class="btn-group btn-group-sm">
-                                        <button class="btn btn-outline-success">✅</button>
-                                        <button class="btn btn-outline-danger">❌</button>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">📅 Rendez-vous</h5>
+                        <p class="card-text">Gérer les rendez-vous</p>
+                        <a th:href="@{/rendezvous}" class="btn btn-primary btn-pulse">Voir les RDV</a>
+                        <a th:href="@{/rendezvous/new}" class="btn btn-success mt-2">Nouveau RDV</a>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animation des boutons et cartes
+            const mainButtons = document.querySelectorAll('.btn-pulse');
+            mainButtons.forEach(btn => {
+                setTimeout(() => {
+                    btn.style.animation = 'pulse 2s infinite';
+                }, 1000);
+            });
+            
+            const cards = document.querySelectorAll('.card');
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(20px)';
+                    card.style.transition = 'all 0.5s ease';
+                    
+                    setTimeout(() => {
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                    }, 100);
+                }, index * 200);
+            });
+        });
+    </script>
 </body>
 </html>
