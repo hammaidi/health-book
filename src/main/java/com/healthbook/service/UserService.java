@@ -18,7 +18,7 @@ public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    // 🔥 CONFIGURATION EXTERNE
+    //  CONFIGURATION EXTERNE
     @Value("${app.admin.email:admin@healthbook.com}")
     private String adminEmail;
 
@@ -70,7 +70,14 @@ public class UserService implements UserDetailsService {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Utilisateur non trouvé: " + username));
     }
-
+    
+ 
+    public boolean userExists(String email) {
+        return userRepository.findByUsername(email).isPresent();
+    }
+    
+    
+    
     public User createUser(User user) {
         if (userRepository.existsByUsername(user.getUsername())) {
             throw new RuntimeException("Un utilisateur avec cet email existe déjà");
